@@ -1,3 +1,7 @@
+using Backend.Middleware;
+using Backend.Services;
+using Backend.Services.Interfaces;
+
 namespace Backend;
 
 public class Program
@@ -17,8 +21,24 @@ public class Program
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
-      
+
+        builder.Services.AddHttpClient("weatherapi",c =>
+            {
+                c.Timeout = TimeSpan.FromSeconds(30);
+            })
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                AutomaticDecompression = System.Net.DecompressionMethods.All
+            });
+
+        builder.Services.AddScoped<IWeatherService, WeatherService>();
+        
+        builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+        builder.Services.AddProblemDetails();
+        
         var app = builder.Build();
+        app.UseExceptionHandler();
+        
         app.UseCors();
 
         // Configure the HTTP request pipeline.

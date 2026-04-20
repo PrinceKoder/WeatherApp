@@ -1,5 +1,5 @@
 export interface WeatherApiData {
-  location: Location,
+  //location: Location,
   current: Current,
   forecast: Forecast
 }

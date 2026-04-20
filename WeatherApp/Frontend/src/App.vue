@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
 import WeatherDashboard from "@/components/WeatherDashboard.vue";
 import { useWeatherApi } from "@/composables/useWeatherApi";
 

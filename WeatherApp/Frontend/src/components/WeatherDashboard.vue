@@ -7,9 +7,9 @@ const current = computed(() => props.data.current)
 
 const round    = (n: number): number  => Math.round(n)
 const cap      = (s: string): string  => s.charAt(0).toUpperCase() + s.slice(1)
-const iconUrl  = (icon: string): string => `https:${icon}` // WeatherAPI уже даёт путь к иконке
+const iconUrl  = (icon: string): string => `https:${icon}`
 
-const fmtTime  = (time: string): string => time.slice(-5) // "2024-04-16 14:00" → "14:00"
+const fmtTime  = (time: string): string => time.slice(-5)
 const fmtDay   = (date: string): string =>
   new Intl.DateTimeFormat('ru-RU', { weekday: 'long' }).format(new Date(date))
 
