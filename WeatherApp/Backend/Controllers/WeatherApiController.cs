@@ -15,9 +15,19 @@ public class WeatherApiController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetWeatherApiData()
+    public async Task<IActionResult> GetWeatherApiData(int mode, CancellationToken cancellationToken)
     {
-        var weatherApiData = await _weatherService.GetWeatherApiDataAsync();
+        if (mode == 1)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken).ConfigureAwait(false);
+        }
+        else 
+        if (mode == 2)
+        {
+            return Problem("Тестовая ошибка для отладки");
+        }
+
+        var weatherApiData = await _weatherService.GetWeatherApiDataAsync(cancellationToken);
         return Ok(weatherApiData);
     }
 }

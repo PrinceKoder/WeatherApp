@@ -15,12 +15,11 @@ const { data, loading, error, fetchWeatherApiData} = useWeatherApi()
       </div>
 
       <div v-else-if="error" key="error" class="screen-center">
-        <span class="err-icon">⛈️</span>
         <p class="err-text">{{ error }}</p>
-        <button class="retry-btn" @click="fetchWeatherApiData">↺ Повторить</button>
+        <button class="refresh-btn" @click="fetchWeatherApiData(0)">↺ Повторить</button>
       </div>
 
-      <WeatherDashboard v-else-if="data" key="data" :data="data!" />
+      <WeatherDashboard v-else-if="data" key="data" :data="data!" :on-refresh="fetchWeatherApiData" />
 
     </Transition>
   </div>
@@ -87,5 +86,22 @@ nav a:first-of-type {
     padding: 1rem 0;
     margin-top: 1rem;
   }
+}
+
+.refresh-btn {
+  width: 50%;
+  padding: 14px;
+  margin-top: 8px;
+  background: rgba(96, 165, 250, .1);
+  border: 1px solid rgba(96, 165, 250, .25);
+  border-radius: 16px;
+  color: #60a5fa;
+  font-size: .95rem;
+  cursor: pointer;
+  transition: background .2s;
+}
+
+.refresh-btn:hover {
+  background: rgba(96, 165, 250, .22);
 }
 </style>

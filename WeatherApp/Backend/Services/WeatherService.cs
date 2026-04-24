@@ -2,42 +2,52 @@ using System.Text.Json;
 using Backend.Models.Dto;
 using Backend.Models.WeatherApi;
 using Backend.Services.Interfaces;
+using Backend.Settings;
+using Microsoft.Extensions.Options;
 
 namespace Backend.Services;
 
 public class WeatherService : IWeatherService
 {
     private readonly IConfiguration _config;
+    private readonly WeatherApiSettings _settings;
     private readonly IHttpClientFactory _factory;
     private readonly ILogger<WeatherService> _logger;
 
-    public WeatherService(IConfiguration config, IHttpClientFactory factory, ILogger<WeatherService> logger)
+    public WeatherService(IConfiguration config, IOptions<WeatherApiSettings> settings, IHttpClientFactory factory,
+        ILogger<WeatherService> logger)
     {
         _config = config;
+        _settings = settings.Value;
         _factory = factory;
         _logger = logger;
     }
 
-    public async Task<WeatherResponseDto> GetWeatherApiDataAsync()
+    public async Task<WeatherResponseDto> GetWeatherApiDataAsync(CancellationToken cancellationToken)
     {
-        var key = _config["WeatherApi:ApiKey"]
-                  ?? throw new InvalidOperationException("API key не задан");
-
         var client = _factory.CreateClient("weatherapi");
 
-        var url = $"https://api.weatherapi.com/v1/forecast.json" +
-                  $"?key={key}&q=Moscow&days=4&lang=ru";
+        var url = $"{_settings.Url}" +
+                  $"?key={_settings.ApiKey}" +
+                  $"&q={_settings.CityName}" +
+                  $"&days={_settings.ForecastDays}" +
+                  $"&lang={_settings.Lang}";
 
-        var response = await client.GetAsync(url);
+        var response = await client.GetAsync(url, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {
-            _logger.LogCritical("Ошибка [{ResponseStatusCode}] : {ResponseReasonPhrase}", response.StatusCode,
+            _logger.LogError("Ошибка [{ResponseStatusCode}] : {ResponseReasonPhrase}", response.StatusCode,
                 response.ReasonPhrase);
-            throw new HttpRequestException($"Сервер WeatherApi вернул ошибку: {response.StatusCode}");
+            
+            throw new HttpRequestException(
+                $"Сервер WeatherApi вернул ошибку: {response.ReasonPhrase}",
+                inner:null,
+                statusCode: response.StatusCode
+                );
         }
 
-        var content = await response.Content.ReadAsStringAsync();
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
         try
         {
             var weatherApiResponse = JsonSerializer.Deserialize<WeatherApiResponse>(content);
@@ -46,12 +56,12 @@ public class WeatherService : IWeatherService
         }
         catch (JsonException ex)
         {
-            _logger.LogCritical(ex, "Ошибка десериализации ответа: {Content}", content);
+            _logger.LogError(ex, "Ошибка десериализации ответа: {Content}", content);
             throw new InvalidOperationException("Не удалось десериализовать ответ");
         }
         catch (Exception ex)
         {
-            _logger.LogCritical("Не удалось сделать маппинг классов: {ExMessage}", ex.Message);
+            _logger.LogError("Не удалось сделать маппинг классов: {ExMessage}", ex.Message);
             throw new InvalidOperationException($"Не удалось сделать маппинг классов");
         }
     }

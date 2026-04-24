@@ -1,6 +1,9 @@
 using Backend.Middleware;
 using Backend.Services;
 using Backend.Services.Interfaces;
+using Backend.Settings;
+using Backend.Settings.Validators;
+using Microsoft.Extensions.Options;
 
 namespace Backend;
 
@@ -24,7 +27,7 @@ public class Program
 
         builder.Services.AddHttpClient("weatherapi",c =>
             {
-                c.Timeout = TimeSpan.FromSeconds(30);
+                c.Timeout = TimeSpan.FromSeconds(5);
             })
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             {
@@ -32,6 +35,12 @@ public class Program
             });
 
         builder.Services.AddScoped<IWeatherService, WeatherService>();
+       
+        builder.Services.AddOptions<WeatherApiSettings>()
+            .Bind(builder.Configuration.GetSection("WeatherApiSettings"))
+            .ValidateOnStart();
+  
+        builder.Services.AddSingleton<IValidateOptions<WeatherApiSettings>, WeatherApiSettingsValidator>();
         
         builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
         builder.Services.AddProblemDetails();

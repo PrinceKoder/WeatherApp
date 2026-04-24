@@ -6,12 +6,16 @@ export function useWeatherApi() {
   const loading = ref<boolean>(false);
   const error = ref<string | null>(null);
 
-  const fetchWeatherApiData = async (): Promise<void> => {
+  const fetchWeatherApiData = async (mode: number = 0): Promise<void> => {
     loading.value = true;
     error.value = null;
     try {
-      const res = await fetch('/api/WeatherApi');
-      if(!res.ok) throw new Error(`Сервер вернул код: ${res.status}`);
+      const res = await fetch(`/api/WeatherApi?mode=${mode}`);
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(
+          `Код ошибки: ${res.status} - ${error.detail}`);
+      }
       data.value = await res.json() as WeatherApiData;
     } catch (ex) {
       error.value = ex instanceof Error ? ex.message : 'Не удалось загрузить данные';
