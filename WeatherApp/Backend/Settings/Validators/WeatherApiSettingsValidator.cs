@@ -4,23 +4,24 @@ namespace Backend.Settings.Validators;
 
 public class WeatherApiSettingsValidator : IValidateOptions<WeatherApiSettings>
 {
-    public ValidateOptionsResult Validate(string? name, WeatherApiSettings? weatherApiSettings)
+    public ValidateOptionsResult Validate(string? name, WeatherApiSettings? options)
     {
-        if (weatherApiSettings == null)
+        if (options == null)
         {
             return ValidateOptionsResult.Fail("Экземпляр настроек апи равен null");
         }
 
-        if (weatherApiSettings.Url == string.Empty)
+        if (options.Url == string.Empty)
         {
             return ValidateOptionsResult.Fail("Экземпляр настроек не содержит ссылку на апи");
             
-        } if (weatherApiSettings.ApiKey == string.Empty)
+        } if (options.ApiKey == string.Empty)
         {
             return ValidateOptionsResult.Fail("Экземпляр настроек не содержит ключа апи");
         }
         
-        if (weatherApiSettings.CityName == string.Empty)
+        // ReSharper disable once ConvertIfStatementToReturnStatement
+        if (options.CityName == string.Empty)
         {
             return ValidateOptionsResult.Fail("Экземпляр настроек не содержит название города для прогноза");
         }

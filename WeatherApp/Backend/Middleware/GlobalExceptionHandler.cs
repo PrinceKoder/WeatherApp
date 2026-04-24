@@ -3,56 +3,48 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Middleware;
 
-public class GlobalExceptionHandler : IExceptionHandler
+public class GlobalExceptionHandler (ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
 {
-    private readonly ILogger<GlobalExceptionHandler> _logger;
-
-    public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
-    {
-        _logger = logger;
-    }
-
     public async ValueTask<bool> TryHandleAsync(
-        HttpContext context,
+        HttpContext httpContext,
         Exception exception,
         CancellationToken cancellationToken)
     {
         if (exception is OperationCanceledException)
         {
-            if (context.RequestAborted.IsCancellationRequested)
+            if (httpContext.RequestAborted.IsCancellationRequested)
                 return true;
 
             // таймаут
-            _logger.LogError(exception.Message);
-            context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+            logger.LogError("{Message}", exception.Message);
+            httpContext.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
             
             var operationCanceledDetails = new ProblemDetails
             {
-                Status = context.Response.StatusCode,
+                Status = httpContext.Response.StatusCode,
                 Detail = "Сервер WeatherApi не отвечает" 
             };
             
-            await context.Response.WriteAsJsonAsync(operationCanceledDetails, cancellationToken);
+            await httpContext.Response.WriteAsJsonAsync(operationCanceledDetails, cancellationToken);
             return true;
         }
 
-        _logger.LogError(exception.Message);
+        logger.LogError("{Message}", exception.Message);
 
-        context.Response.StatusCode = exception switch
+        httpContext.Response.StatusCode = exception switch
         {
             HttpRequestException {StatusCode: not null} ex=> (int)ex.StatusCode,
             HttpRequestException => StatusCodes.Status503ServiceUnavailable,
-            InvalidOperationException => StatusCodes.Status500InternalServerError,
             _ => StatusCodes.Status500InternalServerError
         };
 
         var exceptionDetails = new ProblemDetails
         {
-            Status = context.Response.StatusCode,
+            Status = httpContext.Response.StatusCode,
             Detail = exception.Message
         };
         
-        await context.Response.WriteAsJsonAsync(exceptionDetails, cancellationToken);
+        await httpContext.Response.WriteAsJsonAsync(exceptionDetails, cancellationToken);
         return true;
     }
 }

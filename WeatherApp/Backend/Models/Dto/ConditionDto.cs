@@ -9,7 +9,4 @@ public class ConditionDto
     
     [JsonPropertyName("icon")]
     public required string Icon { get; set; }
-    
-    [JsonPropertyName("code")]
-    public int Code { get; set; }
 }

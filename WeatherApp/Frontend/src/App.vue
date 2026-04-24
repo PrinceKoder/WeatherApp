@@ -88,6 +88,15 @@ nav a:first-of-type {
   }
 }
 
+.spinner {
+  width: 48px; height: 48px;
+  border: 4px solid rgba(255,255,255,.12);
+  border-top-color: #60a5fa;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
 .refresh-btn {
   width: 50%;
   padding: 14px;

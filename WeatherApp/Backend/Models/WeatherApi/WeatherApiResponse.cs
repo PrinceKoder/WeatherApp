@@ -4,11 +4,11 @@ namespace Backend.Models.WeatherApi;
 public class WeatherApiResponse
 {
     [JsonPropertyName("location")]
-    public required Location Location { get; set; }
+    public required Location Location { get; init; }
     
     [JsonPropertyName("current")]
-    public required Current Current { get; set; }
+    public required Current Current { get; init; }
     
     [JsonPropertyName("forecast")]
-    public required Forecast Forecast { get; set; }
+    public required Forecast Forecast { get; init; }
 }

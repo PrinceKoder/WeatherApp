@@ -9,15 +9,13 @@ namespace Backend.Services;
 
 public class WeatherService : IWeatherService
 {
-    private readonly IConfiguration _config;
     private readonly WeatherApiSettings _settings;
     private readonly IHttpClientFactory _factory;
     private readonly ILogger<WeatherService> _logger;
 
-    public WeatherService(IConfiguration config, IOptions<WeatherApiSettings> settings, IHttpClientFactory factory,
+    public WeatherService(IOptions<WeatherApiSettings> settings, IHttpClientFactory factory,
         ILogger<WeatherService> logger)
     {
-        _config = config;
         _settings = settings.Value;
         _factory = factory;
         _logger = logger;
@@ -57,12 +55,12 @@ public class WeatherService : IWeatherService
         catch (JsonException ex)
         {
             _logger.LogError(ex, "Ошибка десериализации ответа: {Content}", content);
-            throw new InvalidOperationException("Не удалось десериализовать ответ");
+            throw new InvalidOperationException("Не удалось десериализовать ответ от api.weatherapi.com");
         }
         catch (Exception ex)
         {
             _logger.LogError("Не удалось сделать маппинг классов: {ExMessage}", ex.Message);
-            throw new InvalidOperationException($"Не удалось сделать маппинг классов");
+            throw new InvalidOperationException("Не удалось сделать маппинг классов");
         }
     }
 

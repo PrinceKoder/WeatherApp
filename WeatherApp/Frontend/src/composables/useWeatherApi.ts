@@ -12,9 +12,9 @@ export function useWeatherApi() {
     try {
       const res = await fetch(`/api/WeatherApi?mode=${mode}`);
       if (!res.ok) {
-        const error = await res.json();
-        throw new Error(
-          `Код ошибки: ${res.status} - ${error.detail}`);
+        const errorBody = await res.json();
+        error.value = `Код ошибки: ${res.status} - ${errorBody.detail}`;
+        return;
       }
       data.value = await res.json() as WeatherApiData;
     } catch (ex) {
